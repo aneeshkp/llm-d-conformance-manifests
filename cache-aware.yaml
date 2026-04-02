@@ -1,0 +1,112 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: qwen2-7b-kv-cache-routing
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 2
+  router:
+    scheduler:
+      template:
+        volumes:
+        - name: tokenizers
+          emptyDir: {}
+        containers:
+        - name: main
+          args:
+          - --v=4
+          - --pool-name
+          - "{{ ChildName .ObjectMeta.Name `-inference-pool` }}"
+          - --pool-namespace
+          - "{{ .ObjectMeta.Namespace }}"
+          - --pool-group
+          - inference.networking.x-k8s.io
+          - --zap-encoder
+          - json
+          - --grpc-port
+          - "9002"
+          - --grpc-health-port
+          - "9003"
+          - --secure-serving
+          - --model-server-metrics-scheme
+          - https
+          - --model-server-metrics-https-insecure-skip-verify
+          - --cert-path
+          - /var/run/kserve/tls
+          - --config-text
+          - |
+            apiVersion: inference.networking.x-k8s.io/v1alpha1
+            kind: EndpointPickerConfig
+            plugins:
+            - type: single-profile-handler
+            - type: precise-prefix-cache-scorer
+              parameters:
+                kvEventsConfig:
+                  zmqEndpoint: "tcp://*:5557"
+                  topicFilter: kv
+                indexerConfig:
+                  tokenProcessorConfig:
+                    blockSize: 16
+                    hashSeed: '42'
+                  kvBlockIndexConfig:
+                    enableMetrics: true
+                    metricsLoggingInterval: 10000000000
+                  tokenizersPoolConfig:
+                    hf:
+                      tokenizersCacheDir: /mnt/tokenizers
+            - type: load-aware-scorer
+            - type: max-score-picker
+            schedulingProfiles:
+            - name: default
+              plugins:
+              - pluginRef: precise-prefix-cache-scorer
+                weight: 2.0
+              - pluginRef: load-aware-scorer
+                weight: 1.0
+              - pluginRef: max-score-picker
+          env:
+          - name: HF_HOME
+            value: /mnt/tokenizers
+          volumeMounts:
+          - mountPath: /mnt/tokenizers
+            name: tokenizers
+          resources: {}
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: redhat-pull-secret
+    containers:
+      - name: main
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: MODEL_NAME
+            value: Qwen/Qwen2.5-7B-Instruct
+          - name: PYTHONHASHSEED
+            value: "42"
+          - name: VLLM_ADDITIONAL_ARGS
+            value: '--enable-prefix-caching --prefix-caching-hash-algo sha256_cbor --block-size 16 --kv-events-config ''{"enable_kv_cache_events": true, "publisher": "zmq", "endpoint": "tcp://qwen2-7b-kv-cache-routing-epp-service:5557", "topic": "kv@$(POD_IP)@$(MODEL_NAME)"}'''
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '2'
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 240
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
