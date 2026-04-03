@@ -5,8 +5,8 @@ metadata:
   name: qwen2-7b-kv-cache-routing
 spec:
   model:
-    uri: hf://Qwen/Qwen2.5-7B-Instruct
-    name: Qwen/Qwen2.5-7B-Instruct
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
   replicas: 2
   router:
     scheduler:
@@ -49,7 +49,7 @@ spec:
       - name: main
         env:
           - name: VLLM_ADDITIONAL_ARGS
-            value: "--prefix-caching-hash-algo sha256 --block-size 64 --kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}' --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://{{ ChildName .ObjectMeta.Name `-epp-service` }}:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen2.5-7B-Instruct\"}'"
+            value: "--prefix-caching-hash-algo sha256 --block-size 64 --kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}' --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://{{ ChildName .ObjectMeta.Name `-epp-service` }}:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}'"
           - name: POD_IP
             valueFrom:
               fieldRef:

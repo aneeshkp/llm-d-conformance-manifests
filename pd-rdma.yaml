@@ -8,8 +8,8 @@ metadata:
 spec:
   replicas: 1
   model:
-    uri: hf://Qwen/Qwen2.5-7B-Instruct
-    name: Qwen/Qwen2.5-7B-Instruct
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
   router:
     route: {}
     gateway: {}
