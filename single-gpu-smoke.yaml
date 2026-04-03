@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: qwen3-0.6b-single
+  name: single-gpu-smoke
 spec:
   model:
     uri: hf://Qwen/Qwen3-0.6B

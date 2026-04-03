@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: qwen2-7b-kv-cache-routing
+  name: cache-aware
 spec:
   model:
     uri: hf://Qwen/Qwen3-0.6B
@@ -91,7 +91,7 @@ spec:
           - name: PYTHONHASHSEED
             value: "42"
           - name: VLLM_ADDITIONAL_ARGS
-            value: '--enable-prefix-caching --prefix-caching-hash-algo sha256_cbor --block-size 16 --kv-events-config ''{"enable_kv_cache_events": true, "publisher": "zmq", "endpoint": "tcp://qwen2-7b-kv-cache-routing-epp-service:5557", "topic": "kv@$(POD_IP)@$(MODEL_NAME)"}'''
+            value: '--enable-prefix-caching --prefix-caching-hash-algo sha256_cbor --block-size 16 --kv-events-config ''{"enable_kv_cache_events": true, "publisher": "zmq", "endpoint": "tcp://cache-aware-epp-service:5557", "topic": "kv@$(POD_IP)@$(MODEL_NAME)"}'''
         resources:
           limits:
             cpu: '4'
