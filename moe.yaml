@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: deepseek-r1-0528
+  name: moe
   annotations:
     k8s.v1.cni.cncf.io/networks: roce-p2
 spec:

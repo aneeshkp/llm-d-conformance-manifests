@@ -2,7 +2,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: qwen2-7b-instruct-pd
+  name: pd-rdma
   annotations:
     k8s.v1.cni.cncf.io/networks: roce-p2
 spec:

@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: qwen2-7b-instruct-single
+  name: single-gpu
 spec:
   model:
     uri: hf://Qwen/Qwen3-0.6B

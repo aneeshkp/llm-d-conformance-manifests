@@ -2,7 +2,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
-  name: qwen2-7b-kv-cache-routing
+  name: cache-aware
 spec:
   model:
     uri: hf://Qwen/Qwen3-0.6B
