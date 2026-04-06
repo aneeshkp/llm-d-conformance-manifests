@@ -1,0 +1,35 @@
+name: Sync main from latest release branch
+
+# This Action runs on a schedule and when manually triggered.
+# It pulls the latest from the configured release branch into main.
+# To change the source branch, update RELEASE_BRANCH below.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+  workflow_dispatch:         # manual trigger
+
+env:
+  RELEASE_BRANCH: 3.4-ea2   # <-- change this when a new release becomes latest
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync main from release branch
+        run: |
+          git fetch origin "$RELEASE_BRANCH"
+          # Only sync if release branch is ahead
+          if git merge-base --is-ancestor HEAD "origin/$RELEASE_BRANCH" 2>/dev/null; then
+            git merge --ff-only "origin/$RELEASE_BRANCH"
+            git push origin main
+            echo "Synced main to $RELEASE_BRANCH"
+          else
+            echo "main is up to date with $RELEASE_BRANCH (or diverged — manual merge needed)"
+          fi
