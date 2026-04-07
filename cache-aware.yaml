@@ -12,7 +12,10 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: redhat-pull-secret
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
       config:
         inline:
           apiVersion: inference.networking.x-k8s.io/v1alpha1
@@ -47,7 +50,7 @@ spec:
     gateway: {}
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhaii-pull-secret
     containers:
       - name: main
         env:

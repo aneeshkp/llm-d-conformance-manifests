@@ -14,10 +14,13 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: redhat-pull-secret
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhaii-pull-secret
     containers:
       - name: main
         env:
@@ -51,7 +54,7 @@ spec:
     replicas: 2
     template:
       imagePullSecrets:
-      - name: redhat-pull-secret
+      - name: rhaii-pull-secret
       containers:
         - name: main
           env:

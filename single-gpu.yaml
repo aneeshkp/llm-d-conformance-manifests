@@ -11,12 +11,15 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: redhat-pull-secret
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
     route: {}
     gateway: {}
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhaii-pull-secret
     containers:
       - name: main
         resources:
