@@ -15,7 +15,10 @@ spec:
     expert: true
     tensor: 1
   router:
-    scheduler: {}
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: redhat-pull-secret
     route: {}
     gateway: {}
   template:
