@@ -8,7 +8,10 @@ spec:
     name: Qwen/Qwen3-0.6B
   replicas: 1
   router:
-    scheduler: {}
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: redhat-pull-secret
     route: {}
     gateway: {}
   template:
