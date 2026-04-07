@@ -11,10 +11,7 @@ spec:
   router:
     route: {}
     gateway: {}
-    scheduler:
-      template:
-        imagePullSecrets:
-        - name: redhat-pull-secret
+    scheduler: {}
   template:
     imagePullSecrets:
     - name: redhat-pull-secret
