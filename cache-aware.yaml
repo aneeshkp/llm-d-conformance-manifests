@@ -28,7 +28,7 @@ spec:
                   zmqEndpoint: "tcp://*:5557"
                 indexerConfig:
                   tokenProcessorConfig:
-                    blockSize: 64
+                    blockSize: 16
                     hashSeed: "42"
                   kvBlockIndexConfig:
                     enableMetrics: true
@@ -55,7 +55,7 @@ spec:
       - name: main
         env:
           - name: VLLM_ADDITIONAL_ARGS
-            value: "--prefix-caching-hash-algo sha256 --block-size 64 --kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}' --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://{{ ChildName .ObjectMeta.Name `-epp-service` }}:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}'"
+            value: "--prefix-caching-hash-algo sha256 --block-size 16 --kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}' --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://{{ ChildName .ObjectMeta.Name `-epp-service` }}:5557\",\"topic\":\"kv@${POD_IP}@Qwen/Qwen3-0.6B\"}'"
           - name: POD_IP
             valueFrom:
               fieldRef:
