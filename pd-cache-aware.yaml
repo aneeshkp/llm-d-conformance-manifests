@@ -1,0 +1,118 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: pd-cache-aware
+spec:
+  replicas: 1
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  router:
+    route: {}
+    gateway: {}
+    scheduler:
+      template:
+        containers:
+        - name: main
+        - name: tokenizer
+      config:
+        inline:
+          apiVersion: inference.networking.x-k8s.io/v1alpha1
+          kind: EndpointPickerConfig
+          plugins:
+            - type: single-profile-handler
+            - type: precise-prefix-cache-scorer
+              parameters:
+                kvEventsConfig:
+                  zmqEndpoint: "tcp://*:5557"
+                indexerConfig:
+                  tokenProcessorConfig:
+                    blockSize: 16
+                    hashSeed: "42"
+                  kvBlockIndexConfig:
+                    enableMetrics: true
+            - type: queue-scorer
+            - type: kv-cache-utilization-scorer
+            - type: max-score-picker
+          schedulingProfiles:
+            - name: default
+              plugins:
+                - pluginRef: queue-scorer
+                  weight: 2
+                - pluginRef: kv-cache-utilization-scorer
+                  weight: 2
+                - pluginRef: precise-prefix-cache-scorer
+                  weight: 3
+                - pluginRef: max-score-picker
+  template:
+    imagePullSecrets:
+    - name: redhat-pull-secret
+    containers:
+      - name: main
+        env:
+          - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: VLLM_ADDITIONAL_ARGS
+            value: "--kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}'"
+          - name: UCX_TLS
+            value: "tcp,sm,self,cuda_copy,cuda_ipc"
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '2'
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
+  prefill:
+    replicas: 2
+    template:
+      imagePullSecrets:
+      - name: redhat-pull-secret
+      containers:
+        - name: main
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: PYTHONHASHSEED
+              value: "42"
+            - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: VLLM_ADDITIONAL_ARGS
+              value: "--prefix-caching-hash-algo sha256 --block-size 16 --kv_transfer_config '{\"kv_connector\":\"NixlConnector\",\"kv_role\":\"kv_both\"}' --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://pd-cache-aware-epp-service:5557\",\"topic\":\"kv@$(POD_IP)@Qwen/Qwen3-0.6B\"}'"
+            - name: UCX_TLS
+              value: "tcp,sm,self,cuda_copy,cuda_ipc"
+          resources:
+            limits:
+              cpu: '4'
+              memory: 32Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: '2'
+              memory: 16Gi
+              nvidia.com/gpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+              scheme: HTTPS
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 5
