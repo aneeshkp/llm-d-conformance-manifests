@@ -2,10 +2,11 @@
 
 LLMInferenceService manifests for RHAIIS 3.4 EA2.
 
+Based on downstream samples: [red-hat-data-services/kserve (rhoai-3.4-ea.2)](https://github.com/red-hat-data-services/kserve/tree/rhoai-3.4-ea.2/docs/samples/llmisvc)
+
 ## What's New in EA2
 
 - **Simplified scheduler config** — `scheduler.config.inline` replaces verbose `scheduler.template.containers[].args` with `--config-text`
-- **P/D routing** — `scheduler: {}` is sufficient, CRD handles defaults
 - **Cache-aware routing** — uses `precise-prefix-cache-scorer` plugin (renamed from `prefix-cache-scorer` in EA1) configured via `scheduler.config.inline`
 - **New CRD field** — `scheduler.config.inline` added to the LLMInferenceService CRD
 
@@ -41,28 +42,15 @@ The `schedulingProfiles[].plugins[].pluginRef` must match the registered plugin 
 
 ## Manifests
 
-| Manifest | Description | Pull secret | Scheduler |
-|----------|-------------|-------------|-----------|
-| `single-gpu.yaml` | 1 GPU with scheduler | `rhaii-pull-secret` | template + stubs |
-| `single-gpu-smoke.yaml` | 1 GPU, minimal smoke test | `rhaii-pull-secret` | template + stubs |
-| `single-gpu-no-scheduler.yaml` | 1 GPU, K8s native routing (no EPP) | `rhaii-pull-secret` | none |
-| `cache-aware.yaml` | Prefix KV cache-aware routing, 2 replicas | `rhaii-pull-secret` | template + stubs + config.inline |
-| `pd.yaml` | P/D disaggregation | `rhaii-pull-secret` | template + stubs |
-| `moe.yaml` | MoE with DP/EP, 8 GPUs, RDMA/RoCE | `rhaii-pull-secret` | template + stubs |
-
-## Deployment types
-
-These manifests work with two deployment models:
-
-| Deployment | Pull secret name | Chart |
 |------------|-----------------|-------|
-| **Operator-based** (`rhai-on-xks-chart`) | `rhaii-pull-secret` (default) | `odh-gitops` |
-| **Helmfile-based** (`rhaii-on-xks`) | Override with `PULL_SECRET=redhat-pull-secret` | `rhaii-on-xks` |
+| Manifest | Description |
+|----------|-------------|
+| `single-gpu.yaml` | 1 GPU with scheduler |
+| `single-gpu-smoke.yaml` | 1 GPU, minimal smoke test |
+| `single-gpu-no-scheduler.yaml` | 1 GPU, K8s native routing (no EPP) |
+| `cache-aware.yaml` | Prefix KV cache-aware routing, 2 replicas |
+| `pd.yaml` | P/D disaggregation |
+| `pd-cache-aware.yaml` | P/D + cache-aware hybrid (EA2 only) |
+| `moe.yaml` | MoE with DP/EP, 8 GPUs, RDMA/RoCE |
 
-## How to check your cluster version
 
-```bash
-kubectl get crd llminferenceservices.serving.kserve.io -o json | \
-  jq '.spec.versions[].schema.openAPIV3Schema.properties.spec.properties.router.properties.scheduler.properties.config'
-# Returns null → EA1 (use 3.4-ea1 branch), returns object → EA2 (this branch)
-```
