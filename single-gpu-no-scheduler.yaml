@@ -11,7 +11,7 @@ spec:
     route: {}
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhaii-pull-secret
     containers:
       - name: main
         resources:

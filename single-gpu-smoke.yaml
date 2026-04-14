@@ -8,12 +8,18 @@ spec:
     name: Qwen/Qwen3-0.6B
   replicas: 1
   router:
-    scheduler: {}
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
     route: {}
     gateway: {}
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhaii-pull-secret
     containers:
       - name: main
         resources:
