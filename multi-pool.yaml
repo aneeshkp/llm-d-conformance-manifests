@@ -1,0 +1,67 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: multi-pool-a
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 1
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: rhaii-pull-secret
+    containers:
+      - name: main
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+---
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: multi-pool-b
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 1
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhaii-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: rhaii-pull-secret
+    containers:
+      - name: main
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
