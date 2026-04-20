@@ -14,7 +14,7 @@ Based on downstream samples: [red-hat-data-services/kserve (rhoai-3.4-ea.2)](htt
 
 ### Pull secrets
 
-All manifests use `rhaii-pull-secret` (not `redhat-pull-secret`). This matches the operator-based deployment (`rhai-on-xks-chart`) which creates `rhaii-pull-secret` in all namespaces.
+All manifests use `rhai-pull-secret` (not `redhat-pull-secret`). This matches the operator-based deployment (`rhai-on-xks-chart`) which creates `rhai-pull-secret` in all namespaces.
 
 ### Scheduler template with container stubs
 
@@ -24,7 +24,7 @@ When providing `scheduler.template.imagePullSecrets` in the manifest, you **must
 scheduler:
   template:
     imagePullSecrets:
-    - name: rhaii-pull-secret
+    - name: rhai-pull-secret
     containers:
     - name: main        # scheduler (EPP)
     - name: tokenizer   # kv-cache / tokenizer sidecar
