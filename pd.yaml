@@ -14,13 +14,13 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: rhaii-pull-secret
+        - name: rhai-pull-secret
         containers:
         - name: main
         - name: tokenizer
   template:
     imagePullSecrets:
-    - name: rhaii-pull-secret
+    - name: rhai-pull-secret
     containers:
       - name: main
         env:
@@ -54,7 +54,7 @@ spec:
     replicas: 2
     template:
       imagePullSecrets:
-      - name: rhaii-pull-secret
+      - name: rhai-pull-secret
       containers:
         - name: main
           env:

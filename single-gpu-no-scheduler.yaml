@@ -11,7 +11,7 @@ spec:
     route: {}
   template:
     imagePullSecrets:
-    - name: rhaii-pull-secret
+    - name: rhai-pull-secret
     containers:
       - name: main
         resources:

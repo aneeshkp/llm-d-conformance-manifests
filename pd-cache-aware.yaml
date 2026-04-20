@@ -46,7 +46,7 @@ spec:
                 - pluginRef: max-score-picker
   template:
     imagePullSecrets:
-    - name: redhat-pull-secret
+    - name: rhai-pull-secret
     containers:
       - name: main
         env:
@@ -80,7 +80,7 @@ spec:
     replicas: 2
     template:
       imagePullSecrets:
-      - name: redhat-pull-secret
+      - name: rhai-pull-secret
       containers:
         - name: main
           env:
