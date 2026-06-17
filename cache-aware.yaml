@@ -1,5 +1,5 @@
 # RHAIIS 3.4 EA2: cache-aware uses scheduler.config.inline (requires EA2 CRD)
-apiVersion: serving.kserve.io/v1alpha1
+apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
   name: cache-aware
@@ -12,7 +12,7 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: rhaii-pull-secret
+        - name: rhai-pull-secret
         containers:
         - name: main
         - name: tokenizer
@@ -50,7 +50,7 @@ spec:
     gateway: {}
   template:
     imagePullSecrets:
-    - name: rhaii-pull-secret
+    - name: rhai-pull-secret
     containers:
       - name: main
         env:

@@ -1,4 +1,4 @@
-apiVersion: serving.kserve.io/v1alpha1
+apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
   name: single-gpu-smoke
@@ -11,7 +11,7 @@ spec:
     scheduler:
       template:
         imagePullSecrets:
-        - name: rhaii-pull-secret
+        - name: rhai-pull-secret
         containers:
         - name: main
         - name: tokenizer
@@ -19,7 +19,7 @@ spec:
     gateway: {}
   template:
     imagePullSecrets:
-    - name: rhaii-pull-secret
+    - name: rhai-pull-secret
     containers:
       - name: main
         resources:
