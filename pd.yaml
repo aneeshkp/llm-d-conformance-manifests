@@ -1,5 +1,5 @@
 # RHAIIS 3.4 EA2: P/D over TCP uses default scheduler
-apiVersion: serving.kserve.io/v1alpha1
+apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
   name: pd
