@@ -1,0 +1,66 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  name: flow-control
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 1
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhai-pull-secret
+        containers:
+        - name: main
+        - name: tokenizer
+      config:
+        inline:
+          apiVersion: llm-d.ai/v1alpha1
+          kind: EndpointPickerConfig
+          featureGates:
+          - flowControl
+          plugins:
+            - type: queue-scorer
+            - type: kv-cache-utilization-scorer
+            - type: prefix-cache-scorer
+          flowControl:
+            defaultRequestTTL: 30s
+          schedulingProfiles:
+            - name: default
+              plugins:
+                - pluginRef: queue-scorer
+                  weight: 2
+                - pluginRef: kv-cache-utilization-scorer
+                  weight: 2
+                - pluginRef: prefix-cache-scorer
+                  weight: 3
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: rhai-pull-secret
+    containers:
+      - name: main
+        env:
+          - name: VLLM_ADDITIONAL_ARGS
+            value: "--max-num-seqs 2"
+        resources:
+          limits:
+            cpu: '2'
+            memory: 8Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '1'
+            memory: 4Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
