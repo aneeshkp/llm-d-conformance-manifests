@@ -1,13 +1,15 @@
 apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
-  name: llm-serving
+  name: pd-performance
 spec:
   model:
     name: openai/gpt-oss-120b
     uri: hf://openai/gpt-oss-120b
   replicas: 2
   template:
+    imagePullSecrets:
+    - name: rhai-pull-secret
     containers:
     - name: main
       env:
@@ -70,6 +72,8 @@ spec:
   prefill:
     replicas: 4
     template:
+      imagePullSecrets:
+      - name: rhai-pull-secret
       containers:
       - name: main
         env:
