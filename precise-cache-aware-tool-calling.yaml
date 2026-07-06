@@ -1,0 +1,84 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  name: gemma4-31b-fp8
+  namespace: gemma4-test
+spec:
+  model:
+    uri: hf://RedHatAI/gemma-4-31B-it-FP8-dynamic
+    name: gemma-4-31b-it-fp8
+  replicas: 4
+  router:
+    scheduler:
+      config:
+        inline:
+          apiVersion: inference.networking.x-k8s.io/v1alpha1
+          kind: EndpointPickerConfig
+          plugins:
+            - type: single-profile-handler
+            - type: precise-prefix-cache-scorer
+              parameters:
+                tokenProcessorConfig:
+                  blockSize: 64
+                  hashSeed: "42"
+                kvEventsConfig:
+                  zmqEndpoint: "tcp://*:5557"
+                indexerConfig:
+                  kvBlockIndexConfig:
+                    enableMetrics: true
+                    metricsLoggingInterval: 60000000000
+            - type: kv-cache-utilization-scorer
+            - type: queue-scorer
+            - type: active-request-scorer
+              parameters:
+                requestTimeout: "2m"
+                idleThreshold: 0
+                maxBusyScore: 0
+            - type: max-score-picker
+          schedulingProfiles:
+            - name: default
+              plugins:
+                - pluginRef: precise-prefix-cache-scorer
+                  weight: 3
+                - pluginRef: kv-cache-utilization-scorer
+                  weight: 2
+                - pluginRef: queue-scorer
+                  weight: 2
+                - pluginRef: active-request-scorer
+                  weight: 3
+                - pluginRef: max-score-picker
+    route: {}
+    gateway: {}
+  template:
+    nodeSelector:
+      agentpool: gpupool
+    containers:
+      - name: main
+        env:
+          - name: VLLM_ADDITIONAL_ARGS
+            value: "--enable-auto-tool-choice --tool-call-parser functiongemma --reasoning-parser functiongemma --max-model-len 8192 --tensor-parallel-size 1 --prefix-caching-hash-algo sha256_cbor --block-size 64 --kv-events-config '{\"enable_kv_cache_events\":true,\"publisher\":\"zmq\",\"endpoint\":\"tcp://{{ ChildName .ObjectMeta.Name `-epp-service` }}:5557\",\"topic\":\"kv@${POD_IP}@gemma-4-31b-it-fp8\"}'"
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: PYTHONHASHSEED
+            value: "42"
+        resources:
+          limits:
+            cpu: "8"
+            memory: 64Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: "8"
+            memory: 64Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
