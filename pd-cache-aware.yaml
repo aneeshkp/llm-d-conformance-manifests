@@ -20,20 +20,18 @@ spec:
           apiVersion: inference.networking.x-k8s.io/v1alpha1
           kind: EndpointPickerConfig
           plugins:
-            - type: single-profile-handler
-            - type: precise-prefix-cache-scorer
+            - type: precise-prefix-cache-producer
               parameters:
                 kvEventsConfig:
                   zmqEndpoint: "tcp://*:5557"
                 indexerConfig:
-                  tokenProcessorConfig:
-                    blockSize: 16
-                    hashSeed: "42"
                   kvBlockIndexConfig:
                     enableMetrics: true
+            - type: prefix-cache-scorer
+              parameters:
+                prefixMatchInfoProducerName: precise-prefix-cache-producer
             - type: queue-scorer
             - type: kv-cache-utilization-scorer
-            - type: max-score-picker
           schedulingProfiles:
             - name: default
               plugins:
@@ -41,9 +39,8 @@ spec:
                   weight: 2
                 - pluginRef: kv-cache-utilization-scorer
                   weight: 2
-                - pluginRef: precise-prefix-cache-scorer
+                - pluginRef: prefix-cache-scorer
                   weight: 3
-                - pluginRef: max-score-picker
   template:
     imagePullSecrets:
     - name: rhai-pull-secret

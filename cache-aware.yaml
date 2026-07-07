@@ -1,4 +1,3 @@
-# RHAIIS 3.4 EA2: cache-aware uses scheduler.config.inline (requires EA2 CRD)
 apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
@@ -16,29 +15,24 @@ spec:
         containers:
         - name: main
         - name: tokenizer
-          env:
-            - name: VLLM_TARGET_DEVICE
-              value: "cpu"
       config:
         inline:
           apiVersion: inference.networking.x-k8s.io/v1alpha1
           kind: EndpointPickerConfig
           plugins:
-            - type: single-profile-handler
-            - type: precise-prefix-cache-scorer
+            - type: precise-prefix-cache-producer
               parameters:
                 kvEventsConfig:
                   zmqEndpoint: "tcp://*:5557"
                 indexerConfig:
-                  tokenProcessorConfig:
-                    blockSize: 16
-                    hashSeed: "42"
                   kvBlockIndexConfig:
                     enableMetrics: true
                     metricsLoggingInterval: 60000000000
+            - type: prefix-cache-scorer
+              parameters:
+                prefixMatchInfoProducerName: precise-prefix-cache-producer
             - type: queue-scorer
             - type: kv-cache-utilization-scorer
-            - type: max-score-picker
           schedulingProfiles:
             - name: default
               plugins:
@@ -46,9 +40,8 @@ spec:
                   weight: 2
                 - pluginRef: kv-cache-utilization-scorer
                   weight: 2
-                - pluginRef: precise-prefix-cache-scorer
+                - pluginRef: prefix-cache-scorer
                   weight: 3
-                - pluginRef: max-score-picker
     route: {}
     gateway: {}
   template:
