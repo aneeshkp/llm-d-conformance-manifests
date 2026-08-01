@@ -10,7 +10,7 @@ on:
   workflow_dispatch:         # manual trigger
 
 env:
-  RELEASE_BRANCH: 3.4-ea2   # <-- change this when a new release becomes latest
+  RELEASE_BRANCH: 3.5-GA   # <-- change this when a new release becomes latest
 
 jobs:
   sync:
