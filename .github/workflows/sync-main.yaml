@@ -1,16 +1,16 @@
-name: Sync main from latest release branch
+name: Sync GA branch from main
 
-# This Action runs on a schedule and when manually triggered.
-# It pulls the latest from the configured release branch into main.
-# To change the source branch, update RELEASE_BRANCH below.
+# Runs when a PR is merged to main. Keeps the GA branch in sync
+# so that `--setup <version>-GA` always has the latest manifests.
+# To change the target GA branch, update GA_BRANCH below.
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'  # every 15 minutes
-  workflow_dispatch:         # manual trigger
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 env:
-  RELEASE_BRANCH: 3.5-GA   # <-- change this when a new release becomes latest
+  GA_BRANCH: 3.5-GA
 
 jobs:
   sync:
@@ -22,14 +22,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sync main from release branch
+      - name: Sync GA branch from main
         run: |
-          git fetch origin "$RELEASE_BRANCH"
-          # Only sync if release branch is ahead
-          if git merge-base --is-ancestor HEAD "origin/$RELEASE_BRANCH" 2>/dev/null; then
-            git merge --ff-only "origin/$RELEASE_BRANCH"
-            git push origin main
-            echo "Synced main to $RELEASE_BRANCH"
+          git fetch origin "$GA_BRANCH" || {
+            echo "Branch $GA_BRANCH does not exist — creating from main"
+            git push origin "main:refs/heads/$GA_BRANCH"
+            exit 0
+          }
+          git checkout "$GA_BRANCH"
+          if git merge --ff-only origin/main 2>/dev/null; then
+            git push origin "$GA_BRANCH"
+            echo "Synced $GA_BRANCH to main"
           else
-            echo "main is up to date with $RELEASE_BRANCH (or diverged — manual merge needed)"
+            echo "WARNING: $GA_BRANCH has diverged from main — manual merge needed"
+            exit 1
           fi
