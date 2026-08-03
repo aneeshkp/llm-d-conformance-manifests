@@ -11,7 +11,6 @@ spec:
       adapters:
         - name: sql-adapter
           uri: hf://edbeeching/opt-125m-lora
-      maxAdapters: 2
   router:
     scheduler:
       template:
