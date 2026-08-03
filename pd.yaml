@@ -17,7 +17,6 @@ spec:
         - name: rhai-pull-secret
         containers:
         - name: main
-        - name: tokenizer
   template:
     imagePullSecrets:
     - name: rhai-pull-secret

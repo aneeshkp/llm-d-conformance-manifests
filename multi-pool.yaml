@@ -14,7 +14,6 @@ spec:
         - name: rhai-pull-secret
         containers:
         - name: main
-        - name: tokenizer
     route: {}
     gateway: {}
   template:
@@ -48,7 +47,6 @@ spec:
         - name: rhai-pull-secret
         containers:
         - name: main
-        - name: tokenizer
     route: {}
     gateway: {}
   template:
