@@ -12,7 +12,7 @@ spec:
         - name: sql-adapter
           uri: hf://edbeeching/opt-125m-lora
         - name: code-adapter
-          uri: hf://edbeeching/opt-125m-lora
+          uri: hf://velaa/opt-125m-lora-finetuned-mnli
       maxAdapters: 2
       maxRank: 64
   router:
