@@ -1,0 +1,45 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  name: lora-single
+spec:
+  replicas: 1
+  model:
+    uri: hf://facebook/opt-125m
+    name: facebook/opt-125m
+    lora:
+      adapters:
+        - name: sql-adapter
+          uri: hf://edbeeching/opt-125m-lora
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhai-pull-secret
+        containers:
+        - name: main
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: rhai-pull-secret
+    containers:
+      - name: main
+        resources:
+          limits:
+            cpu: '2'
+            memory: 8Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '1'
+            memory: 4Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
