@@ -13,7 +13,7 @@ spec:
           uri: hf://edbeeching/opt-125m-lora
         - name: code-adapter
           uri: hf://edbeeching/opt-125m-lora
-      maxAdapters: 4
+      maxAdapters: 2
       maxRank: 64
   router:
     scheduler:
