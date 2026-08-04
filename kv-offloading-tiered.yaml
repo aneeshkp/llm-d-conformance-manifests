@@ -24,12 +24,17 @@ spec:
         emptyDir:
           medium: Memory
           # sizeLimit should be set to 120% of CPU size + 1
-          sizeLimit: 6Gi
+          sizeLimit: 1Gi
     containers:
       - name: main
         volumeMounts:
           - name: dshm
             mountPath: /dev/shm
+        env:
+          # Shrink the on-GPU KV cache so modest traffic overflows to the CPU
+          # tier and then spills to the filesystem tier (/mnt/kv-cache-0).
+          - name: VLLM_ADDITIONAL_ARGS
+            value: "--gpu-memory-utilization 0.2"
         resources:
           limits:
             cpu: '4'
@@ -50,7 +55,8 @@ spec:
           failureThreshold: 5
   workload:
     kvCacheOffloading:
-      cpu: "4Gi"
+      # Small CPU tier so it fills quickly and evicts to the filesystem tier.
+      cpu: "512Mi"
       evictionPolicy: lru
       secondary:
         - fileSystem:
