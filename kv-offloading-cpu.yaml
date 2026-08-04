@@ -1,0 +1,54 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  name: kv-offloading-cpu
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 1
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhai-pull-secret
+        containers:
+        - name: main
+    route: {}
+    gateway: {}
+  template:
+    imagePullSecrets:
+    - name: rhai-pull-secret
+    volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          # sizeLimit should be set to 120% of CPU size + 1
+          sizeLimit: 6Gi
+    containers:
+      - name: main
+        volumeMounts:
+          - name: dshm
+            mountPath: /dev/shm
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '2'
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
+  workload:
+    kvCacheOffloading:
+      cpu: "4Gi"
+      evictionPolicy: lru
