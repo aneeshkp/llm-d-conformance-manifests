@@ -1,7 +1,7 @@
 name: Sync EA branch from main
 
 # Runs when a PR is merged to main. Keeps the EA branch in sync
-# so that `--setup <version>-ea1` always has the latest manifests.
+# so that `--setup <version>-ea2` always has the latest manifests.
 # To change the target EA branch, update EA_BRANCH below.
 
 on:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  EA_BRANCH: 3.6-ea1
+  EA_BRANCH: 3.6-ea2
 
 jobs:
   sync:
@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
