@@ -99,7 +99,7 @@ In 3.4 this was a single `precise-prefix-cache-scorer` plugin.
 | `cache-aware.yaml` | Prefix KV cache-aware routing, 2 replicas | template + stubs + config.inline |
 | `flow-control.yaml` | Flow control feature gate, default request TTL | template + stubs + config.inline |
 | `flow-control-tokens.yaml` | Flow control with token-based concurrency + saturation detection | template + stubs + config.inline |
-| `agentic-serving.yaml` | Agentic-serving router stack with tool-calling flags | template + stubs + config.inline |
+| `tool-calling.yaml` | Tool-calling router stack | template + stubs + config.inline |
 | `kv-offloading-cpu.yaml` | KV cache offloading, CPU RAM tier only | template + stubs + workload.kvCacheOffloading |
 | `kv-offloading-tiered.yaml` | KV cache offloading cascade (GPU→CPU→disk), CPU + emptyDir | template + stubs + workload.kvCacheOffloading |
 | `pd.yaml` | P/D disaggregation | template + stubs |

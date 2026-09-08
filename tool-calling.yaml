@@ -1,12 +1,12 @@
 ---
-# LLMInferenceService for agentic tool calling conformance
+# LLMInferenceService for tool-calling conformance
 # Model: Qwen3-Coder-30B-A3B-Instruct-FP8 (MoE, 30B total / 3B active, FP8)
 # Parser: qwen3_coder (native tool-call support)
-# Requires: 1x GPU (80GB VRAM), hf-token secret
+# Requires: 1x GPU (80GB VRAM)
 apiVersion: serving.kserve.io/v1alpha2
 kind: LLMInferenceService
 metadata:
-  name: agentic-serving
+  name: tool-calling
 spec:
   model:
     uri: "hf://Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8"
@@ -21,11 +21,6 @@ spec:
     containers:
       - name: main
         env:
-          - name: HF_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: hf-token
-                key: HF_TOKEN
           - name: VLLM_ADDITIONAL_ARGS
             value: >-
               --enable-auto-tool-choice
