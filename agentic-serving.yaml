@@ -29,7 +29,7 @@ spec:
           - name: VLLM_ADDITIONAL_ARGS
             value: >-
               --enable-auto-tool-choice
-              --tool-call-parser=qwen3_coder
+              --tool-call-parser=hermes
               --enable-log-requests
               --enable-log-outputs
         resources:
