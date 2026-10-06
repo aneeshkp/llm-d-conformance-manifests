@@ -1,9 +1,0 @@
-apiVersion: maas.opendatahub.io/v1alpha1
-kind: MaaSModelRef
-metadata:
-  name: single-gpu
-  namespace: llm
-spec:
-  modelRef:
-    kind: LLMInferenceService
-    name: single-gpu

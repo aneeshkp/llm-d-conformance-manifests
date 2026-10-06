@@ -108,16 +108,20 @@ In 3.4 this was a single `precise-prefix-cache-scorer` plugin.
 | `moe.yaml` | MoE with DP/EP, 8 GPUs, RDMA/RoCE | template + stubs |
 | `lora-single.yaml` | Single LoRA adapter (HF) | template + stubs |
 | `lora-multi.yaml` | Multiple LoRA adapters with maxRank/maxAdapters | template + stubs |
+| `maas-single-gpu.yaml` | `single-gpu` served through MaaS (see below) | template + stubs |
 
 ### MaaS (RHOAI 3.5)
 
-The `maas/3.5/` bundle is used by the MaaS single-GPU conformance scenario. Apply the resources in this order:
+`maas-single-gpu.yaml` is the `single-gpu` LLMInferenceService bound to both
+`inference-gateway` and `maas-default-gateway` (the MaaS controller only governs
+routes on the MaaS gateway), plus:
 
-| Manifest | Description |
-|----------|-------------|
-| `maas/3.5/single-gpu.yaml` | Single-GPU LLMInferenceService attached to the inference and MaaS gateways |
-| `maas/3.5/maas-model-ref.yaml` | Publishes the LLMInferenceService through MaaS |
-| `maas/3.5/maas-auth-policy.yaml` | Grants authenticated users access to the model |
-| `maas/3.5/maas-subscription.yaml` | Adds a token rate limit for authenticated users |
+| Resource | Namespace | Description |
+|----------|-----------|-------------|
+| `MaaSModelRef` | model namespace | Publishes the LLMInferenceService through MaaS |
+| `MaaSAuthPolicy` | `models-as-a-service` | Grants authenticated users access to the model |
+| `MaaSSubscription` | `models-as-a-service` | Token rate limit (100 tokens/1m) for authenticated users |
 
-The cluster must have the RHOAI 3.5 MaaS components and both gateways installed before applying this bundle.
+The policy and subscription reference the model in `llm-conformance-test`. The
+cluster must have the RHOAI 3.5 MaaS components (RHCL/Kuadrant, `maas-api`) and
+both gateways installed.
