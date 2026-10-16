@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  EA_BRANCH: 3.6-ea2
+  EA_BRANCH: 3.6-GA
 
 jobs:
   sync:
