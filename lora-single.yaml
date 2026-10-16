@@ -5,12 +5,12 @@ metadata:
 spec:
   replicas: 1
   model:
-    uri: hf://facebook/opt-125m
-    name: facebook/opt-125m
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
     lora:
       adapters:
-        - name: sql-adapter
-          uri: hf://edbeeching/opt-125m-lora
+        - name: tldr-adapter
+          uri: hf://phh/Qwen3-0.6B-TLDR-Lora
   router:
     scheduler:
       template:
@@ -25,6 +25,9 @@ spec:
     - name: rhai-pull-secret
     containers:
       - name: main
+        env:
+          - name: VLLM_ADDITIONAL_ARGS
+            value: "--gpu-memory-utilization 0.8"
         resources:
           limits:
             cpu: '2'

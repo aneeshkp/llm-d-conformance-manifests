@@ -1,0 +1,89 @@
+# single-gpu served through MaaS. Same LLMInferenceService as single-gpu.yaml,
+# plus maas-default-gateway: the MaaS controller only governs model routes bound
+# to that gateway. The MaaS resources publish the model, grant authenticated
+# users access, and set a token rate limit.
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  name: maas-single-gpu
+spec:
+  model:
+    uri: hf://Qwen/Qwen3-0.6B
+    name: Qwen/Qwen3-0.6B
+  replicas: 1
+  router:
+    scheduler:
+      template:
+        imagePullSecrets:
+        - name: rhai-pull-secret
+        containers:
+        - name: main
+    route: {}
+    gateway:
+      refs:
+      - name: inference-gateway
+        namespace: redhat-ods-applications
+      - name: maas-default-gateway
+        namespace: redhat-ods-applications
+  template:
+    imagePullSecrets:
+    - name: rhai-pull-secret
+    containers:
+      - name: main
+        resources:
+          limits:
+            cpu: '4'
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: '2'
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
+---
+# Lives in the same namespace as the LLMInferenceService.
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: maas-single-gpu
+spec:
+  modelRef:
+    kind: LLMInferenceService
+    name: maas-single-gpu
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSAuthPolicy
+metadata:
+  name: maas-single-gpu-auth
+  namespace: models-as-a-service
+spec:
+  modelRefs:
+  - name: maas-single-gpu
+    namespace: llm-conformance-test
+  subjects:
+    groups:
+    - name: system:authenticated
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: maas-single-gpu-subscription
+  namespace: models-as-a-service
+spec:
+  modelRefs:
+  - name: maas-single-gpu
+    namespace: llm-conformance-test
+    tokenRateLimits:
+    - limit: 100
+      window: 1m
+  owner:
+    groups:
+    - name: system:authenticated

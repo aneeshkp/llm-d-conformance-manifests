@@ -99,6 +99,7 @@ In 3.4 this was a single `precise-prefix-cache-scorer` plugin.
 | `cache-aware.yaml` | Prefix KV cache-aware routing, 2 replicas | template + stubs + config.inline |
 | `flow-control.yaml` | Flow control feature gate, default request TTL | template + stubs + config.inline |
 | `flow-control-tokens.yaml` | Flow control with token-based concurrency + saturation detection | template + stubs + config.inline |
+| `tool-calling.yaml` | Tool-calling router stack | template + stubs + config.inline |
 | `kv-offloading-cpu.yaml` | KV cache offloading, CPU RAM tier only | template + stubs + workload.kvCacheOffloading |
 | `kv-offloading-tiered.yaml` | KV cache offloading cascade (GPU→CPU→disk), CPU + emptyDir | template + stubs + workload.kvCacheOffloading |
 | `pd.yaml` | P/D disaggregation | template + stubs |
@@ -107,3 +108,20 @@ In 3.4 this was a single `precise-prefix-cache-scorer` plugin.
 | `moe.yaml` | MoE with DP/EP, 8 GPUs, RDMA/RoCE | template + stubs |
 | `lora-single.yaml` | Single LoRA adapter (HF) | template + stubs |
 | `lora-multi.yaml` | Multiple LoRA adapters with maxRank/maxAdapters | template + stubs |
+| `maas-single-gpu.yaml` | `single-gpu` served through MaaS (see below) | template + stubs |
+
+### MaaS (RHOAI 3.5)
+
+`maas-single-gpu.yaml` is the `single-gpu` LLMInferenceService bound to both
+`inference-gateway` and `maas-default-gateway` (the MaaS controller only governs
+routes on the MaaS gateway), plus:
+
+| Resource | Namespace | Description |
+|----------|-----------|-------------|
+| `MaaSModelRef` | model namespace | Publishes the LLMInferenceService through MaaS |
+| `MaaSAuthPolicy` | `models-as-a-service` | Grants authenticated users access to the model |
+| `MaaSSubscription` | `models-as-a-service` | Token rate limit (100 tokens/1m) for authenticated users |
+
+The policy and subscription reference the model in `llm-conformance-test`. The
+cluster must have the RHOAI 3.5 MaaS components (RHCL/Kuadrant, `maas-api`) and
+both gateways installed.

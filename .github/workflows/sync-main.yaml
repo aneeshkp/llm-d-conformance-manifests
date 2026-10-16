@@ -1,8 +1,8 @@
-name: Sync GA branch from main
+name: Sync EA branch from main
 
-# Runs when a PR is merged to main. Keeps the GA branch in sync
-# so that `--setup <version>-GA` always has the latest manifests.
-# To change the target GA branch, update GA_BRANCH below.
+# Runs when a PR is merged to main. Keeps the EA branch in sync
+# so that `--setup <version>-ea2` always has the latest manifests.
+# To change the target EA branch, update EA_BRANCH below.
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  GA_BRANCH: 3.5-GA
+  EA_BRANCH: 3.6-GA
 
 jobs:
   sync:
@@ -18,22 +18,22 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Sync GA branch from main
+      - name: Sync EA branch from main
         run: |
-          git fetch origin "$GA_BRANCH" || {
-            echo "Branch $GA_BRANCH does not exist — creating from main"
-            git push origin "main:refs/heads/$GA_BRANCH"
+          git fetch origin "$EA_BRANCH" || {
+            echo "Branch $EA_BRANCH does not exist — creating from main"
+            git push origin "main:refs/heads/$EA_BRANCH"
             exit 0
           }
-          git checkout "$GA_BRANCH"
+          git checkout "$EA_BRANCH"
           if git merge --ff-only origin/main 2>/dev/null; then
-            git push origin "$GA_BRANCH"
-            echo "Synced $GA_BRANCH to main"
+            git push origin "$EA_BRANCH"
+            echo "Synced $EA_BRANCH to main"
           else
-            echo "WARNING: $GA_BRANCH has diverged from main — manual merge needed"
+            echo "WARNING: $EA_BRANCH has diverged from main — manual merge needed"
             exit 1
           fi
