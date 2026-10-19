@@ -13,6 +13,8 @@ spec:
         template:
           imagePullSecrets:
           - name: rhai-pull-secret
+          containers:
+          - name: main
       template:
         imagePullSecrets:
         - name: rhai-pull-secret
