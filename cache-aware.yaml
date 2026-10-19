@@ -22,9 +22,6 @@ spec:
             - type: token-producer
               parameters:
                 modelName: Qwen/Qwen3-0.6B
-                vllm:
-                  endpointDiscovery:
-                    attemptTimeout: 2s
             - type: precise-prefix-cache-producer
               parameters:
                 kvEventsConfig:
