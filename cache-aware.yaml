@@ -9,6 +9,10 @@ spec:
   replicas: 2
   router:
     scheduler:
+      tokenizer:
+        template:
+          imagePullSecrets:
+          - name: rhai-pull-secret
       template:
         imagePullSecrets:
         - name: rhai-pull-secret
